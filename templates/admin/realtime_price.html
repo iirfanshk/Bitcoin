@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}Real-Time Price - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+    <div class="sidebar-nav">
+        <h3>Admin Menu</h3>
+        <ul>
+            <li><a href="{{ url_for('admin_home') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('admin_security') }}">Security</a></li>
+            <li><a href="{{ url_for('admin_analytics') }}">Analytics</a></li>
+            <li><a href="{{ url_for('admin_realtime_price') }}" class="active">Real-Time Price</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <h1>📊 Real-Time Bitcoin Price Monitoring</h1>
+        <p style="color: var(--text-light); margin-bottom: 2rem;">Live price data from CoinGecko & yFinance APIs</p>
+
+        <!-- Enhanced price display showing both APIs with separate cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+            <!-- CoinGecko API Card -->
+            <div class="card">
+                <h2>💎 CoinGecko API</h2>
+                <div class="data-display">
+                    <div class="data-row">
+                        <span class="data-label">Current Price:</span>
+                        <span class="data-value" id="coingecko-price">$--</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Last Updated:</span>
+                        <span class="data-value" id="coingecko-update">--</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Status:</span>
+                        <span class="data-value price-positive" id="coingecko-status">✓ Connected</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- yFinance API Card -->
+            <div class="card">
+                <h2>📈 yFinance API</h2>
+                <div class="data-display">
+                    <div class="data-row">
+                        <span class="data-label">Current Price:</span>
+                        <span class="data-value" id="yfinance-price">$--</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Last Updated:</span>
+                        <span class="data-value" id="yfinance-update">--</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Status:</span>
+                        <span class="data-value price-positive" id="yfinance-status">✓ Connected</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📈 Price History (Last 30 Days)</h2>
+            <div class="chart-container">
+                <canvas id="historicalChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Enhanced API status table showing both APIs side by side -->
+        <div class="card">
+            <h2>🔌 API Status & Data Sources</h2>
+            <table>
+                <tr>
+                    <th>Data Source</th>
+                    <th>Status</th>
+                    <th>Current Price</th>
+                    <th>Last Updated</th>
+                    <th>Priority</th>
+                </tr>
+                <tr>
+                    <td><strong>CoinGecko API</strong></td>
+                    <td><span class="price-positive" id="cg-status">✓ Connected</span></td>
+                    <td id="cg-price">$--</td>
+                    <td id="cg-time">--</td>
+                    <td>Primary</td>
+                </tr>
+                <tr>
+                    <td><strong>yFinance API</strong></td>
+                    <td><span class="price-positive" id="yf-status">✓ Connected</span></td>
+                    <td id="yf-price">$--</td>
+                    <td id="yf-time">--</td>
+                    <td>Secondary</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>💡 Data Integration Info</h2>
+            <p>
+                This platform simultaneously fetches Bitcoin price data from two reliable sources:
+            </p>
+            <ul style="margin-left: 2rem; margin-top: 1rem; line-height: 2; color: var(--text-light);">
+                <li><strong style="color: var(--text-dark);">CoinGecko API:</strong> Comprehensive cryptocurrency data including market cap, volume, and real-time prices</li>
+                <li><strong style="color: var(--text-dark);">yFinance API:</strong> Financial market data with technical indicators and historical analysis</li>
+            </ul>
+            <p style="margin-top: 1.5rem; color: var(--text-light);">
+                Both APIs are updated every 5 seconds, ensuring you have the most recent Bitcoin pricing information from multiple reliable sources.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+    function updatePrices() {
+        fetch('/api/btc-price')
+            .then(response => response.json())
+            .then(data => {
+                if (data.coingecko_available) {
+                    const cgPrice = parseFloat(data.coingecko_price);
+                    document.getElementById('coingecko-price').textContent = `$${cgPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    document.getElementById('cg-price').textContent = `$${cgPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    const cgTime = new Date(data.coingecko_timestamp).toLocaleTimeString();
+                    document.getElementById('coingecko-update').textContent = cgTime;
+                    document.getElementById('cg-time').textContent = cgTime;
+                    document.getElementById('coingecko-status').textContent = '✓ Connected';
+                    document.getElementById('cg-status').textContent = '✓ Connected';
+                } else {
+                    document.getElementById('coingecko-status').textContent = '✗ Disconnected';
+                    document.getElementById('cg-status').textContent = '✗ Disconnected';
+                }
+
+                if (data.yfinance_available) {
+                    const yfPrice = parseFloat(data.yfinance_price);
+                    document.getElementById('yfinance-price').textContent = `$${yfPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    document.getElementById('yf-price').textContent = `$${yfPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    const yfTime = new Date(data.yfinance_timestamp).toLocaleTimeString();
+                    document.getElementById('yfinance-update').textContent = yfTime;
+                    document.getElementById('yf-time').textContent = yfTime;
+                    document.getElementById('yfinance-status').textContent = '✓ Connected';
+                    document.getElementById('yf-status').textContent = '✓ Connected';
+                } else {
+                    document.getElementById('yfinance-status').textContent = '✗ Disconnected';
+                    document.getElementById('yf-status').textContent = '✗ Disconnected';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching price:', error);
+            });
+    }
+
+    // Update every 5 seconds
+    updatePrices();
+    setInterval(updatePrices, 5000);
+
+    let historicalChart = null;
+
+    function loadHistoricalChart() {
+        fetch('/api/btc-historical/30')
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('historicalChart').getContext('2d');
+                
+                const datasets = [];
+                
+                // CoinGecko dataset (purple/blue)
+                if (data.coingecko && data.coingecko.length > 0) {
+                    datasets.push({
+                        label: 'CoinGecko Price',
+                        data: data.coingecko.map(p => p[1]),
+                        borderColor: '#5b7ce5',
+                        backgroundColor: 'rgba(91, 124, 229, 0.08)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#5b7ce5',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    });
+                }
+                
+                // yFinance dataset (teal/green)
+                if (data.yfinance && data.yfinance.length > 0) {
+                    datasets.push({
+                        label: 'yFinance Price',
+                        data: data.yfinance.map(p => p[1]),
+                        borderColor: '#48a996',
+                        backgroundColor: 'rgba(72, 169, 150, 0.08)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#48a996',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    });
+                }
+                
+                // Get labels from whichever dataset has more data
+                const labels = (data.coingecko && data.coingecko.length > 0) 
+                    ? data.coingecko.map(p => p[0])
+                    : (data.yfinance ? data.yfinance.map(p => p[0]) : []);
+                
+                // Destroy previous chart if it exists
+                if (historicalChart) {
+                    historicalChart.destroy();
+                }
+                
+                // Create new chart with both datasets
+                historicalChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                labels: {
+                                    font: { size: 13, weight: 'bold' },
+                                    color: '#2d3748',
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                grid: {
+                                    color: 'rgba(91, 124, 229, 0.08)',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: '#718096',
+                                    font: { size: 12 }
+                                }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: {
+                                    color: '#718096',
+                                    font: { size: 12 }
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error loading historical data:', error));
+    }
+
+    // Load chart on page load and refresh every 60 seconds
+    loadHistoricalChart();
+    setInterval(loadHistoricalChart, 60000);
+</script>
+
+{% endblock %}

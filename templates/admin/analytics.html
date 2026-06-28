@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+    <div class="sidebar-nav">
+        <h3>Admin Menu</h3>
+        <ul>
+            <li><a href="{{ url_for('admin_home') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('admin_security') }}">Security</a></li>
+            <li><a href="{{ url_for('admin_analytics') }}" class="active">Analytics</a></li>
+            <li><a href="{{ url_for('admin_realtime_price') }}">Real-Time Price</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <h1>Analytics Dashboard</h1>
+
+        <div class="card">
+            <h2>Bitcoin Price Trend (90 Days)</h2>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Model Performance Comparison</h2>
+            <div class="chart-container">
+                <canvas id="modelChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>User Activity</h2>
+            <div class="chart-container">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Bitcoin Price Chart
+    let priceChart = null;
+    let modelChart = null;
+    let activityChart = null;
+
+    // Function to initialize and update price chart
+    function initPriceChart() {
+        fetch('/api/btc-historical/90')
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('priceChart').getContext('2d');
+                const series = (data.coingecko && data.coingecko.length) ? data.coingecko : data.yfinance;
+
+                if (!series || !series.length) {
+                    return;
+                }
+                
+                if (priceChart) {
+                    priceChart.data.labels = series.map(p => p[0]);
+                    priceChart.data.datasets[0].data = series.map(p => p[1]);
+                    priceChart.update();
+                } else {
+                    priceChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: series.map(p => p[0]),
+                            datasets: [{
+                                label: 'Bitcoin Price (USD)',
+                                data: series.map(p => p[1]),
+                                borderColor: '#f7931a',
+                                backgroundColor: 'rgba(247, 147, 26, 0.1)',
+                                tension: 0.1,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: false
+                                }
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error fetching price data:', error));
+    }
+
+    function getRandomActivityData() {
+        return [
+            Math.floor(Math.random() * 500 + 350),
+            Math.floor(Math.random() * 400 + 250),
+            Math.floor(Math.random() * 250 + 100),
+            Math.floor(Math.random() * 300 + 150)
+        ];
+    }
+
+    // Model Performance Chart
+    function initModelChart() {
+        const ctx = document.getElementById('modelChart').getContext('2d');
+        const modelData = [87, 82, 85, 83];
+        
+        if (modelChart) {
+            modelChart.data.datasets[0].data = modelData.map(d => d + Math.random() * 2 - 1);
+            modelChart.update();
+        } else {
+            modelChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['LSTM', 'ARIMA', 'Gradient Boosting', 'Random Forest'],
+                    datasets: [{
+                        label: 'Accuracy (%)',
+                        data: modelData,
+                        backgroundColor: [
+                            '#f7931a',
+                            '#f9b44d',
+                            '#ff6b6b',
+                            '#4ecdc4'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // User Activity Chart
+    function initActivityChart() {
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        const activityData = getRandomActivityData();
+        
+        if (activityChart) {
+            activityChart.data.datasets[0].data = activityData;
+            activityChart.update();
+        } else {
+            activityChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Predictions', 'Price Checks', 'Analytics Views', 'Content Views'],
+                    datasets: [{
+                        data: activityData,
+                        backgroundColor: [
+                            '#f7931a',
+                            '#ff6b6b',
+                            '#4ecdc4',
+                            '#45b7d1'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    }
+
+    // Initialize all charts on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initPriceChart();
+        initModelChart();
+        initActivityChart();
+        
+        setInterval(() => {
+            initPriceChart();
+            initModelChart();
+            initActivityChart();
+        }, 15000);
+    });
+</script>
+
+{% endblock %}

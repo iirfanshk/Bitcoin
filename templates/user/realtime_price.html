@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Real-Time Bitcoin Price{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+    <div class="sidebar-nav">
+        <h3>User Menu</h3>
+        <ul>
+            <li><a href="{{ url_for('user_home') }}">Home</a></li>
+            <li><a href="{{ url_for('user_about') }}">About Bitcoin</a></li>
+            <li><a href="{{ url_for('user_predict') }}">Predict Price</a></li>
+            <li><a href="{{ url_for('user_ai_predict') }}">AI Prediction</a></li>
+            <li><a href="{{ url_for('user_realtime_price') }}" class="active">Real-Time Price</a></li>
+            <li><a href="{{ url_for('user_contact') }}">Contact</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <h1>Real-Time Bitcoin Price</h1>
+        <p style="color: var(--text-light); margin-bottom: 2rem;">Live Bitcoin price updates from CoinGecko and yFinance.</p>
+        <div class="card" style="max-width: 500px; margin: 0 auto;">
+            <h2 id="realtime-price" style="font-size: 2.5rem; color: #7c3aed; text-align: center;">$--</h2>
+            <p id="realtime-source" style="text-align: center; color: #9b7ecf;">Source: --</p>
+        </div>
+    </div>
+</div>
+<script>
+function fetchRealtimePrice() {
+    fetch('/api/btc-price')
+        .then(response => response.json())
+        .then(data => {
+            const price = data.coingecko_price || data.yfinance_price;
+            const source = data.coingecko_available ? 'CoinGecko' : 'yFinance';
+            document.getElementById('realtime-price').textContent = price ? `$${parseFloat(price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '$Unable to fetch';
+            document.getElementById('realtime-source').textContent = `Source: ${source}`;
+        })
+        .catch(error => {
+            document.getElementById('realtime-price').textContent = '$Error';
+            document.getElementById('realtime-source').textContent = 'Connection failed';
+        });
+}
+fetchRealtimePrice();
+setInterval(fetchRealtimePrice, 30000);
+</script>
+{% endblock %}

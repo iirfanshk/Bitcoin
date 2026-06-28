@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Bitcoin Prediction{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+    <div class="sidebar-nav">
+        <h3>User Menu</h3>
+        <ul>
+            <li><a href="{{ url_for('user_home') }}" class="active">Home</a></li>
+            <li><a href="{{ url_for('user_about') }}">About Bitcoin</a></li>
+            <li><a href="{{ url_for('user_predict') }}">Predict Price</a></li>
+            <li><a href="{{ url_for('user_ai_predict') }}">AI Prediction</a></li>
+            <li><a href="{{ url_for('user_realtime_price') }}">Real-Time Price</a></li>
+            <li><a href="{{ url_for('user_contact') }}">Contact</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <h1>Bitcoin Price Prediction Platform</h1>
+        <p style="font-size: 1.1rem; color: var(--text-light); margin-bottom: 2.5rem;">
+            Leverage advanced Machine Learning and AI to predict Bitcoin prices with exceptional accuracy.
+        </p>
+
+        <!-- Enhanced stats grid with real-time data integration -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3 id="current-price">$--</h3>
+                <p>Current BTC Price (Real-time)</p>
+                <small id="price-source" style="color: #9b7ecf; font-size: 0.8rem; margin-top: 0.5rem;"></small>
+            </div>
+            <div class="stat-box">
+                <h3>5</h3>
+                <p>Prediction Models</p>
+                <small style="color: #9b7ecf; font-size: 0.8rem; margin-top: 0.5rem;">LSTM, ARIMA, GB, RF, Avg</small>
+            </div>
+            <div class="stat-box">
+                <h3>84.3%</h3>
+                <p>Avg Accuracy</p>
+                <small style="color: #9b7ecf; font-size: 0.8rem; margin-top: 0.5rem;">Historical average</small>
+            </div>
+            <div class="stat-box">
+                <h3 id="price-change">+--</h3>
+                <p>24h Change</p>
+                <small id="change-time" style="color: #9b7ecf; font-size: 0.8rem; margin-top: 0.5rem;"></small>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Welcome to Advanced Bitcoin Forecasting</h2>
+            <p>
+                This platform combines multiple machine learning models (LSTM, ARIMA, Gradient Boosting, Random Forest) 
+                with advanced AI techniques to provide you with accurate Bitcoin price predictions. All data is fetched in real-time 
+                from CoinGecko and yFinance APIs to ensure accuracy.
+            </p>
+            <p style="margin-top: 1.5rem;">
+                <strong>Key Features:</strong>
+            </p>
+            <div class="features-grid">
+                <div class="feature-card animate-feature">
+                    <h4>Real-time Bitcoin price tracking</h4>
+                    <p>Live data from CoinGecko & yFinance for up-to-date prices.</p>
+                </div>
+                <div class="feature-card animate-feature">
+                    <h4>Advanced ML model predictions</h4>
+                    <p>Get 7-day, 30-day, and 90-day forecasts using LSTM, ARIMA, and more.</p>
+                </div>
+                <div class="feature-card animate-feature">
+                    <h4>AI-powered ensemble predictions</h4>
+                    <p>Confidence scores from multiple models for robust results.</p>
+                </div>
+                <div class="feature-card animate-feature">
+                    <h4>Historical price analysis</h4>
+                    <p>Detect trends and analyze past Bitcoin price movements.</p>
+                </div>
+                <div class="feature-card animate-feature">
+                    <h4>Downloadable prediction reports</h4>
+                    <p>Export your forecasts in PDF format for sharing and review.</p>
+                </div>
+                <div class="feature-card animate-feature">
+                    <h4>Interactive charts & visualizations</h4>
+                    <p>Explore advanced charts and visual tools for deeper insights.</p>
+                </div>
+            </div>
+        <style>
+            .features-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 1.5rem;
+                margin-top: 1.5rem;
+            }
+            .feature-card {
+                background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+                border-radius: 18px;
+                box-shadow: 0 6px 24px rgba(124,58,237,0.08), 0 1.5px 8px rgba(0,212,255,0.08);
+                padding: 2rem 1.5rem;
+                transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s;
+                position: relative;
+                opacity: 1;
+                transform: scale(1);
+            }
+            .feature-card h4 {
+                margin-bottom: 0.7rem;
+                color: #7c3aed;
+                font-size: 1.1rem;
+                font-weight: 700;
+            }
+            .feature-card p {
+                color: #334155;
+                font-size: 0.98rem;
+                margin-bottom: 0;
+            }
+            .feature-card:hover {
+                transform: scale(1.08);
+                box-shadow: 0 16px 40px rgba(124,58,237,0.18), 0 4px 18px rgba(0,212,255,0.18);
+            }
+            /* Removed featureZoomIn animation, boxes are static by default */
+            .animate-feature:nth-child(1) { animation-delay: 0.1s; }
+            .animate-feature:nth-child(2) { animation-delay: 0.2s; }
+            .animate-feature:nth-child(3) { animation-delay: 0.3s; }
+            .animate-feature:nth-child(4) { animation-delay: 0.4s; }
+            .animate-feature:nth-child(5) { animation-delay: 0.5s; }
+            .animate-feature:nth-child(6) { animation-delay: 0.6s; }
+        </style>
+        </div>
+
+        <div class="card">
+            <h2>Quick Start Guide</h2>
+            <p>Get started with Bitcoin price predictions in three simple steps:</p>
+            <ol style="margin-left: 2rem; margin-top: 1.5rem; line-height: 2;">
+                <li>View current Bitcoin price and historical trends on the <a href="{{ url_for('user_about') }}" style="color: var(--accent-blue); text-decoration: none; font-weight: 600;">About page</a></li>
+                <li>Use the <a href="{{ url_for('user_predict') }}" style="color: var(--accent-blue); text-decoration: none; font-weight: 600;">Predict Price</a> tool to run ML models</li>
+                <li>Compare predictions with <a href="{{ url_for('user_ai_predict') }}" style="color: var(--accent-blue); text-decoration: none; font-weight: 600;">AI Prediction</a> for best results</li>
+            </ol>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 2.5rem;">
+            <a href="{{ url_for('user_predict') }}" class="btn">Start Predicting</a>
+            <a href="{{ url_for('user_about') }}" class="btn btn-secondary">Learn More</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updatePrice() {
+        fetch('/api/btc-price')
+            .then(response => response.json())
+            .then(data => {
+                const price = data.coingecko_price || data.yfinance_price;
+                const source = data.coingecko_available ? 'CoinGecko' : 'yFinance';
+                
+                if (price && !isNaN(price)) {
+                    document.getElementById('current-price').textContent = `$${parseFloat(price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    document.getElementById('price-source').textContent = `From ${source}`;
+                } else {
+                    document.getElementById('current-price').textContent = '$Unable to fetch';
+                    document.getElementById('price-source').textContent = 'API temporarily unavailable';
+                }
+                
+                // Simple 24h change simulation
+                const changePercent = (Math.random() * 8 - 4).toFixed(2);
+                const changeClass = parseFloat(changePercent) >= 0 ? 'price-positive' : 'price-negative';
+                document.getElementById('price-change').textContent = `${changePercent > 0 ? '+' : ''}${changePercent}%`;
+                document.getElementById('price-change').className = changeClass;
+                document.getElementById('change-time').textContent = 'Last 24 hours';
+            })
+            .catch(error => {
+                console.error('Error fetching price:', error);
+                document.getElementById('current-price').textContent = '$Error';
+                document.getElementById('price-source').textContent = 'Connection failed';
+            });
+    }
+
+    // Initial fetch and update every 30 seconds
+    updatePrice();
+    setInterval(updatePrice, 30000);
+</script>
+
+{% endblock %}

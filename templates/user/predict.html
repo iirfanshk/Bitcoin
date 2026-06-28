@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+
+{% block title %}Predict Price - Bitcoin Prediction{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+    /* Enhanced form styling with better visibility and interaction handling */
+    .main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .prediction-form {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(15px);
+        padding: 2.5rem;
+        border-radius: 20px;
+        border: 1px solid rgba(91, 124, 229, 0.15);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        position: relative;
+        z-index: 1;
+    }
+
+    .prediction-form h2 {
+        color: #2c3e50;
+        margin-top: 0;
+        margin-bottom: 2rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .prediction-form .form-group {
+        margin-bottom: 2rem;
+    }
+
+    .prediction-form label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1rem;
+    }
+
+    /* Dropdown select styling with full cursor and interaction support */
+    .prediction-form select {
+        width: 100%;
+        padding: 1rem 1.4rem;
+        border: 2px solid rgba(91, 124, 229, 0.25);
+        border-radius: 14px;
+        font-size: 1rem;
+        font-weight: 500;
+        background-color: rgba(255, 255, 255, 0.95);
+        color: #2c3e50;
+        cursor: pointer;
+        position: relative;
+        z-index: 10;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b7ce5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.5rem;
+        padding-right: 3rem;
+    }
+
+    .prediction-form select:hover {
+        border-color: #5b7ce5;
+        background-color: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 4px 15px rgba(91, 124, 229, 0.15);
+    }
+
+    .prediction-form select:focus {
+        outline: none;
+        border-color: #5b7ce5;
+        box-shadow: 0 0 0 5px rgba(91, 124, 229, 0.15);
+    }
+
+    .prediction-form select:active {
+        cursor: pointer;
+    }
+
+    .prediction-form select option {
+        padding: 0.75rem;
+        background-color: #ffffff;
+        color: #2c3e50;
+        cursor: pointer;
+    }
+
+    /* File input wrapper and button styling */
+    .file-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        position: relative;
+        z-index: 5;
+    }
+
+    #fileInputBtn {
+        padding: 1rem 1.8rem;
+        background: linear-gradient(135deg, #5b7ce5 0%, #9b7ecf 100%);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(91, 124, 229, 0.35);
+        position: relative;
+        z-index: 10;
+    }
+
+    #fileInputBtn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 35px rgba(91, 124, 229, 0.45);
+    }
+
+    #fileInputBtn:active {
+        transform: translateY(-1px);
+    }
+
+    #fileName {
+        color: #7f8c9a;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    .btn-submit {
+        padding: 1.2rem 2.5rem;
+        background: linear-gradient(135deg, #5b7ce5 0%, #9b7ecf 100%);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(91, 124, 229, 0.35);
+        margin-top: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 35px rgba(91, 124, 229, 0.45);
+    }
+
+    .btn-submit:active {
+        transform: translateY(-1px);
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(91, 124, 229, 0.2);
+        border-top-color: #5b7ce5;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .price-positive {
+        color: #10b981;
+        font-weight: 600;
+    }
+
+    .price-negative {
+        color: #ef4444;
+        font-weight: 600;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 400px;
+    }
+
+    .card {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(15px);
+        padding: 2rem;
+        border-radius: 20px;
+        border: 1px solid rgba(91, 124, 229, 0.15);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        margin-top: 2rem;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    table th,
+    table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(91, 124, 229, 0.1);
+    }
+
+    table th {
+        background-color: rgba(91, 124, 229, 0.08);
+        font-weight: 600;
+        color: #2c3e50;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <h1>ML-Based Bitcoin Price Prediction</h1>
+
+    <div class="card prediction-form">
+        <h2>Configure Prediction</h2>
+        <form id="predictionForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="model">ML Model</label>
+                <!-- Native select with enhanced styling and z-index for proper interaction -->
+                <select id="model" name="model" required>
+                    <option value="lstm">LSTM</option>
+                    <option value="arima">ARIMA</option>
+                    <option value="gradient_boosting">Gradient Boosting</option>
+                    <option value="random_forest">Random Forest</option>
+                    <option value="average">Average</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="dataFile">Upload Data File (CSV)</label>
+                <!-- File input with hidden native input and styled button trigger -->
+                <div class="file-input-wrapper">
+                    <input type="file" id="dataFile" name="dataFile" accept=".csv" required style="display: none;" />
+                    <button type="button" id="fileInputBtn">Choose File</button>
+                    <span id="fileName">No file chosen</span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Generate Predictions</button>
+        </form>
+    </div>
+
+    <div id="predictionResults" style="display: none;">
+        <div class="card">
+            <h2>Prediction Results</h2>
+            <table>
+                <tr>
+                    <th>Model</th>
+                    <th>Predicted Price</th>
+                    <th>Change from Current</th>
+                    <th>% Change</th>
+                </tr>
+                <tbody id="predictionsTable">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Model Predictions Comparison</h2>
+            <div class="chart-container">
+                <canvas id="predictionsChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card" style="text-align: center;">
+            <button type="button" class="btn-submit" onclick="downloadPDF()">Download Prediction Report (PDF)</button>
+        </div>
+    </div>
+
+    <div id="loadingSpinner" style="display: none; text-align: center; padding: 3rem;">
+        <div class="spinner"></div>
+        <p style="margin-top: 1.5rem; color: #7f8c9a; font-size: 1.1rem;">Generating predictions with ML models...</p>
+    </div>
+</div>
+
+<script>
+    let currentPredictions = {};
+
+    document.getElementById('fileInputBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('dataFile').click();
+    }, false);
+
+    document.getElementById('dataFile').addEventListener('change', function(e) {
+        const fileName = this.files[0] ? this.files[0].name : 'No file chosen';
+        document.getElementById('fileName').textContent = fileName;
+    }, false);
+
+    document.getElementById('model').addEventListener('change', function(e) {
+        // Dropdown working
+    }, false);
+
+    document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const model = document.getElementById('model').value;
+        const dataFile = document.getElementById('dataFile').files[0];
+        
+        if (!dataFile) {
+            alert('Please select a CSV file');
+            return;
+        }
+
+        const spinner = document.getElementById('loadingSpinner');
+        const results = document.getElementById('predictionResults');
+        spinner.style.display = 'block';
+        results.style.display = 'none';
+
+        const formData = new FormData();
+        formData.append('model', model);
+        formData.append('dataFile', dataFile);
+        formData.append('days', 30);
+
+        try {
+            const response = await fetch('/api/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            // Basic validation of API response before using it
+            if (!response.ok || !data || !Array.isArray(data.predicted_prices)) {
+                const message = (data && data.error) ? data.error : 'Prediction service returned an invalid response';
+                throw new Error(message);
+            }
+
+            currentPredictions = data;
+
+            const currentPrice = data.current_price;
+            const tbody = document.getElementById('predictionsTable');
+            tbody.innerHTML = '';
+
+            const modelNamesMap = {
+                'lstm': 'LSTM',
+                'arima': 'ARIMA',
+                'gradient_boosting': 'Gradient Boosting',
+                'random_forest': 'Random Forest',
+                'average': 'Average'
+            };
+
+            const priceArr = data.predicted_prices;
+            const price = priceArr[priceArr.length - 1];
+            const change = price - currentPrice;
+            const pctChange = (change / currentPrice * 100).toFixed(2);
+            const row = `
+                <tr>
+                    <td>${modelNamesMap[model]}</td>
+                    <td>$${parseFloat(price).toFixed(2)}</td>
+                    <td class="${change >= 0 ? 'price-positive' : 'price-negative'}">
+                        ${change >= 0 ? '+' : ''}$${parseFloat(change).toFixed(2)}
+                    </td>
+                    <td class="${change >= 0 ? 'price-positive' : 'price-negative'}">
+                        ${pctChange >= 0 ? '+' : ''}${pctChange}%
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+
+            let chartLabels = priceArr.map((_, idx) => `Day ${idx + 1}`);
+            if (window.predictionsChartInstance) {
+                window.predictionsChartInstance.destroy();
+            }
+            window.predictionsChartInstance = new Chart(document.getElementById('predictionsChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: `${modelNamesMap[model]} Predicted Price (USD)`,
+                        data: priceArr,
+                        fill: false,
+                        borderColor: '#f7931a',
+                        backgroundColor: '#4ecdc4',
+                        tension: 0.2,
+                        pointBackgroundColor: '#f7931a',
+                        pointBorderColor: '#4ecdc4',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+
+            spinner.style.display = 'none';
+            results.style.display = 'block';
+        } catch (error) {
+            console.error('Prediction error:', error);
+            spinner.style.display = 'none';
+            alert('Error generating predictions: ' + (error.message || error));
+        }
+    }, false);
+
+    async function downloadPDF() {
+        try {
+            const response = await fetch('/api/download-pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ predictions: currentPredictions })
+            });
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `prediction_${new Date().getTime()}.pdf`;
+            a.click();
+        } catch (error) {
+            alert('Error downloading PDF: ' + error);
+        }
+    }
+</script>
+
+{% endblock %}

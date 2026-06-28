@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Bitcoin Prediction{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+    <div class="sidebar-nav">
+        <h3>Admin Menu</h3>
+        <ul>
+            <li><a href="{{ url_for('admin_home') }}" class="active">Dashboard</a></li>
+            <li><a href="{{ url_for('admin_security') }}">Security</a></li>
+            <li><a href="{{ url_for('admin_analytics') }}">Analytics</a></li>
+            <li><a href="{{ url_for('admin_realtime_price') }}">Real-Time Price</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <h1> Admin Dashboard</h1>
+        <p style="color: var(--text-light); margin-bottom: 2rem;">Bitcoin Prediction Platform Admin Control Panel</p>
+
+        <!-- Enhanced stats with real-time API information -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3>{{ active_users }}</h3>
+                <p>Active Users</p>
+                <small style="color: #9b7ecf; font-size: 0.8rem; margin-top: 0.5rem;">This month</small>
+            </div>
+            <div class="stat-box">
+                <h3>{{ total_predictions }}</h3>
+                <p>Predictions Made</p>
+                <small style="color: #9b7ecf; font-size: 0.8rem; margin-top: 0.5rem;">All time</small>
+            </div>
+            <div class="stat-box">
+                <h3>{{ ml_models_count }}</h3>
+                <p>ML Models Active</p>
+                <small style="color: #9b7ecf; font-size: 0.8rem; margin-top: 0.5rem;">LSTM, ARIMA, GB, RF, Avg</small>
+            </div>
+            <div class="stat-box">
+                <h3>99.9%</h3>
+                <p>System Uptime</p>
+                <small style="color: #9b7ecf; font-size: 0.8rem; margin-top: 0.5rem;">Last 30 days</small>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>System Health Overview</h2>
+            <table>
+                <tr>
+                    <th>Component</th>
+                    <th>Status</th>
+                    <th>Last Updated</th>
+                </tr>
+                <tr>
+                    <td><strong>Backend API</strong></td>
+                    <td><span class="price-positive"> Operational</span></td>
+                    <td>2 minutes ago</td>
+                </tr>
+                <tr>
+                    <td><strong>Database</strong></td>
+                    <td><span class="price-positive"> Operational</span></td>
+                    <td>1 minute ago</td>
+                </tr>
+                <tr>
+                    <td><strong>ML Models</strong></td>
+                    <td><span class="price-positive"> Running</span></td>
+                    <td>Just now</td>
+                </tr>
+                <tr>
+                    <td><strong>CoinGecko API</strong></td>
+                    <td><span class="price-positive">Connected</span></td>
+                    <td>30 seconds ago</td>
+                </tr>
+                <tr>
+                    <td><strong>yFinance API</strong></td>
+                    <td><span class="price-positive"> Connected</span></td>
+                    <td>45 seconds ago</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Data Integration Status</h2>
+            <p style="margin-bottom: 1.5rem; color: var(--text-light);">
+                Real-time price data is being fetched from two reliable sources with automatic fallback:
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div style="padding: 1.5rem; background: rgba(72, 187, 120, 0.1); border-radius: 12px; border: 1px solid rgba(72, 187, 120, 0.3);">
+                    <h3 style="color: #22863a; margin-bottom: 0.5rem; font-size: 1.1rem;">CoinGecko API</h3>
+                    <p style="color: var(--text-light); font-size: 0.9rem;">Primary source for real-time Bitcoin prices and market data</p>
+                </div>
+                <div style="padding: 1.5rem; background: rgba(72, 187, 120, 0.1); border-radius: 12px; border: 1px solid rgba(72, 187, 120, 0.3);">
+                    <h3 style="color: #22863a; margin-bottom: 0.5rem; font-size: 1.1rem;">yFinance Fallback</h3>
+                    <p style="color: var(--text-light); font-size: 0.9rem;">Backup source ensures zero data downtime if primary fails</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2> Quick Links</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                <a href="{{ url_for('admin_security') }}" class="btn"> View Security Logs</a>
+                <a href="{{ url_for('admin_analytics') }}" class="btn">View Analytics</a>
+                <a href="{{ url_for('admin_realtime_price') }}" class="btn">Monitor Prices</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

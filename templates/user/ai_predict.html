@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}AI Prediction - Bitcoin Prediction{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+    .ai-predict-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .prediction-timeframe-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .prediction-timeframe-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1rem;
+    }
+
+    .prediction-timeframe-group select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e0e7ff;
+        border-radius: 8px;
+        font-size: 1rem;
+        background-color: #ffffff;
+        color: #2c3e50;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235b7ce5' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        padding-right: 2.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .prediction-timeframe-group select:hover {
+        border-color: #5b7ce5;
+        box-shadow: 0 4px 12px rgba(91, 124, 229, 0.15);
+    }
+
+    .prediction-timeframe-group select:focus {
+        outline: none;
+        border-color: #5b7ce5;
+        box-shadow: 0 0 0 3px rgba(91, 124, 229, 0.1);
+    }
+
+    .prediction-timeframe-group select option {
+        padding: 0.5rem;
+        background-color: #ffffff;
+        color: #2c3e50;
+    }
+
+    .ai-prediction-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(230,240,255,0.9) 100%);
+        border: 1px solid rgba(91, 124, 229, 0.2);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(91, 124, 229, 0.08);
+    }
+
+    .ai-prediction-card h2 {
+        margin-top: 0;
+        color: #2c3e50;
+    }
+
+    .generate-btn {
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #5b7ce5 0%, #7b9bcf 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(91, 124, 229, 0.3);
+    }
+
+    .generate-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(91, 124, 229, 0.4);
+    }
+
+    .generate-btn:active {
+        transform: translateY(0);
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(91, 124, 229, 0.2);
+        border-top-color: #5b7ce5;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .chart-container {
+        position: relative;
+        height: 400px;
+        margin-bottom: 2rem;
+    }
+
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e0e7ff;
+    }
+
+    .results-table th {
+        background-color: #f0f4ff;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .price-positive {
+        color: #27ae60;
+        font-weight: 600;
+    }
+
+    .price-negative {
+        color: #e74c3c;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ai-predict-container">
+    <h1>AI-Powered Ensemble Prediction</h1>
+
+    <div class="ai-prediction-card">
+        <h2>Configure AI Prediction</h2>
+        <form id="aiPredictionForm">
+            <div class="prediction-timeframe-group">
+                <label for="aiDays">Prediction Timeframe</label>
+                <!-- Updated select element with proper styling classes -->
+                <select id="aiDays" name="aiDays" required>
+                    <option value="7">7 Days</option>
+                    <option value="14">14 Days</option>
+                    <option value="30" selected>30 Days</option>
+                    <option value="90">90 Days</option>
+                </select>
+            </div>
+            <button type="submit" class="generate-btn">Generate AI Prediction</button>
+        </form>
+    </div>
+
+    <div id="aiResults" style="display: none;">
+        <div class="ai-prediction-card">
+            <h2>AI Ensemble Prediction</h2>
+            <div style="text-align: center; padding: 2rem;">
+                <div style="font-size: 2.5rem; color: #5b7ce5; margin-bottom: 1rem;">
+                    $<span id="aiPrice">0</span>
+                </div>
+                <div>
+                    <p style="font-size: 1.1rem; margin: 0.5rem 0;">
+                        Confidence Level: <span id="aiConfidence" style="color: #5b7ce5; font-weight: bold;">0%</span>
+                    </p>
+                    <p id="aiChange" style="font-size: 1rem; margin: 0.5rem 0;"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-prediction-card">
+            <h2>ML vs AI Prediction Comparison</h2>
+            <div class="chart-container">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+        </div>
+
+        <div class="ai-prediction-card">
+            <h2>Current Bitcoin Price</h2>
+            <table class="results-table">
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Current BTC Price</td>
+                    <td id="currentBtcPrice">Loading...</td>
+                </tr>
+                <tr>
+                    <td>AI Prediction</td>
+                    <td id="aiPredictionValue">$0</td>
+                </tr>
+                <tr>
+                    <td>Expected Change</td>
+                    <td id="expectedChange">0</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="aiLoadingSpinner" style="display: none; text-align: center; padding: 2rem;">
+        <div class="spinner"></div>
+        <p>Analyzing data with AI ensemble...</p>
+    </div>
+</div>
+
+<script>
+    document.getElementById('aiPredictionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const days = document.getElementById('aiDays').value;
+        const spinner = document.getElementById('aiLoadingSpinner');
+        const results = document.getElementById('aiResults');
+        
+        spinner.style.display = 'block';
+        results.style.display = 'none';
+
+        try {
+            // Get current price
+            const priceRes = await fetch('/api/btc-price');
+            const priceData = await priceRes.json();
+            const currentPrice = priceData.coingecko_price || priceData.yfinance_price || 0;
+
+            // Get AI prediction
+            const aiRes = await fetch('/api/ai-predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ days: parseInt(days) })
+            });
+
+            const aiData = await aiRes.json();
+            
+            // Get ML predictions for comparison
+            const mlRes = await fetch('/api/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ days: parseInt(days) })
+            });
+
+            const mlData = await mlRes.json();
+
+            const aiSeries = aiData.ai_ensemble;
+            const aiPrice = Array.isArray(aiSeries) ? aiSeries[aiSeries.length - 1] : aiSeries;
+            const basePrice = Number.isFinite(aiData.current_price) ? aiData.current_price : currentPrice;
+            const hasBasePrice = Number.isFinite(basePrice) && basePrice > 0;
+            const change = hasBasePrice ? (aiPrice - basePrice) : 0;
+            const pctChange = hasBasePrice ? ((change / basePrice) * 100).toFixed(2) : null;
+
+            // Update UI
+            document.getElementById('aiPrice').textContent = parseFloat(aiPrice).toFixed(2);
+            document.getElementById('aiConfidence').textContent = (aiData.confidence * 100).toFixed(1) + '%';
+            document.getElementById('aiChange').innerHTML = hasBasePrice ? `
+                <span class="${change >= 0 ? 'price-positive' : 'price-negative'}">
+                    Expected Change: ${change >= 0 ? '+' : ''}$${parseFloat(change).toFixed(2)} (${pctChange >= 0 ? '+' : ''}${pctChange}%)
+                </span>
+            ` : '<span>Expected Change: N/A</span>';
+
+            document.getElementById('currentBtcPrice').textContent = hasBasePrice ? `$${parseFloat(basePrice).toFixed(2)}` : 'N/A';
+            document.getElementById('aiPredictionValue').textContent = `$${parseFloat(aiPrice).toFixed(2)}`;
+            document.getElementById('expectedChange').innerHTML = hasBasePrice ? `
+                <span class="${change >= 0 ? 'price-positive' : 'price-negative'}">
+                    ${change >= 0 ? '+' : ''}$${parseFloat(change).toFixed(2)} (${pctChange >= 0 ? '+' : ''}${pctChange}%)
+                </span>
+            ` : '<span>N/A</span>';
+
+            // Comparison chart
+            const models = ['lstm', 'arima', 'gradient_boosting', 'random_forest', 'average'];
+            const mlPredictions = models.map(m => mlData[m]);
+
+            new Chart(document.getElementById('comparisonChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['LSTM', 'ARIMA', 'GB', 'RF', 'ML Avg', 'AI Ensemble'],
+                    datasets: [{
+                        label: `Prediction Comparison (${days} Days)`,
+                        data: [...mlPredictions, aiPrice],
+                        backgroundColor: [
+                            '#5b7ce5',
+                            '#9b7ecf',
+                            '#7b9bcf',
+                            '#6b8fc9',
+                            '#8b9fc7',
+                            '#27ae60'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+
+            spinner.style.display = 'none';
+            results.style.display = 'block';
+        } catch (error) {
+            console.error('Error:', error);
+            spinner.style.display = 'none';
+            alert('Error generating AI prediction: ' + error.message);
+        }
+    });
+</script>
+
+{% endblock %}

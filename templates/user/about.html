@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}About Bitcoin - Bitcoin Prediction{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+    <div class="sidebar-nav">
+        <h3>User Menu</h3>
+        <ul>
+            <li><a href="{{ url_for('user_home') }}">Home</a></li>
+            <li><a href="{{ url_for('user_about') }}" class="active">About Bitcoin</a></li>
+            <li><a href="{{ url_for('user_predict') }}">Predict Price</a></li>
+            <li><a href="{{ url_for('user_ai_predict') }}">AI Prediction</a></li>
+            <li><a href="{{ url_for('user_contact') }}">Contact</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <h1>About Bitcoin</h1>
+
+        <div class="card">
+            <h2>What is Bitcoin?</h2>
+            <p>
+                Bitcoin is the world's first decentralized cryptocurrency, created in 2009 by an unknown person or group using the pseudonym Satoshi Nakamoto. 
+                It operates on a peer-to-peer network and uses blockchain technology to ensure secure, transparent, and immutable transactions.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>ML Models Used for Prediction</h2>
+            <div class="ml-models-grid">
+                <div class="ml-model-card">
+                    <strong>LSTM (Long Short-Term Memory)</strong>
+                    <p>A type of recurrent neural network that excels at learning patterns in time series data, making it suitable for predicting future Bitcoin prices based on historical trends.</p>
+                </div>
+                <div class="ml-model-card">
+                    <strong>ARIMA (AutoRegressive Integrated Moving Average)</strong>
+                    <p>A statistical model that combines autoregression, differencing, and moving average components to forecast time series data, commonly used in financial predictions.</p>
+                </div>
+                <div class="ml-model-card">
+                    <strong>Gradient Boosting</strong>
+                    <p>An ensemble machine learning technique that builds predictive models by combining multiple weak learners, often decision trees, to improve accuracy and handle complex data relationships.</p>
+                </div>
+                <div class="ml-model-card">
+                    <strong>Random Forest</strong>
+                    <p>An ensemble method that constructs multiple decision trees and averages their predictions, providing robust and reliable forecasts even with noisy data.</p>
+                </div>
+                <div class="ml-model-card">
+                    <strong>Average Model</strong>
+                    <p>A simple approach that averages the predictions from all models above to provide a consensus forecast, reducing the risk of relying on a single technique.</p>
+                </div>
+            </div>
+            <p style="color: #64748b; margin-top: 1.2rem; font-size: 1rem;">Each model has its strengths and weaknesses. By leveraging multiple approaches, the platform aims to provide more reliable and insightful Bitcoin price predictions.</p>
+        <style>
+            .ml-models-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 1.5rem;
+                margin-top: 1.5rem;
+            }
+            .ml-model-card {
+                background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+                border-radius: 16px;
+                box-shadow: 0 6px 24px rgba(124,58,237,0.08), 0 1.5px 8px rgba(0,212,255,0.08);
+                padding: 1.5rem 1.2rem;
+                transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s;
+                position: relative;
+                opacity: 1;
+                transform: scale(1);
+            }
+            .ml-model-card:hover {
+                transform: scale(1.08);
+                box-shadow: 0 16px 40px rgba(124,58,237,0.18), 0 4px 18px rgba(0,212,255,0.18);
+            }
+            .ml-model-card strong {
+                color: #7c3aed;
+                font-size: 1.08rem;
+                font-weight: 700;
+                display: block;
+                margin-bottom: 0.6rem;
+            }
+            .ml-model-card p {
+                color: #334155;
+                font-size: 0.97rem;
+                margin-bottom: 0;
+            }
+        </style>
+        </div>
+
+        <div class="card">
+            <h2>Key Statistics</h2>
+            <table>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Market Cap</td>
+                    <td>~$2 Trillion USD</td>
+                </tr>
+                <tr>
+                    <td>Circulating Supply</td>
+                    <td>21 Million BTC</td>
+                </tr>
+                <tr>
+                    <td>Launch Year</td>
+                    <td>2009</td>
+                </tr>
+                <tr>
+                    <td>Block Time</td>
+                    <td>~10 minutes</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chartConfig = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: false
+            }
+        }
+    };
+
+    // 7 Days
+    fetch('/api/btc-historical/7')
+        .then(r => r.json())
+        .then(data => {
+            new Chart(document.getElementById('chart7d').getContext('2d'), {
+                <!-- Historical price charts removed. ML model explanations added. -->
+    fetch('/api/btc-historical/180')
+        .then(r => r.json())
+        .then(data => {
+            new Chart(document.getElementById('chart6m').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: data.prices.map(p => p[0]),
+                    datasets: [{
+                        label: 'BTC Price',
+                        data: data.prices.map(p => p[1]),
+                        borderColor: '#f7931a',
+                        backgroundColor: 'rgba(247, 147, 26, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: chartConfig
+            });
+        });
+
+    // 1 Year
+    fetch('/api/btc-historical/365')
+        .then(r => r.json())
+        .then(data => {
+            new Chart(document.getElementById('chart1y').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: data.prices.map(p => p[0]),
+                    datasets: [{
+                        label: 'BTC Price',
+                        data: data.prices.map(p => p[1]),
+                        borderColor: '#f7931a',
+                        backgroundColor: 'rgba(247, 147, 26, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: chartConfig
+            });
+        });
+</script>
+
+{% endblock %}

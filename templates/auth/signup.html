@@ -1,0 +1,349 @@
+{% block footer %}{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Bitcoin Prediction Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Auth container - center on screen */
+    .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 180px);
+        padding: 2rem !important;
+    }
+
+    /* Multi-color animated background for signup */
+    .auth-card {
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(30px);
+        border-radius: 28px;
+        padding: 3.5rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 212, 255, 0.1);
+        border: 2px solid rgba(0, 212, 255, 0.2);
+        width: 100%;
+        max-width: 900px;
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 0.6s ease-out;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Multi-color gradient orbs with animation */
+    .auth-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .auth-card::after {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        left: -50%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 10s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) translateX(0px); }
+        50% { transform: translateY(-20px) translateX(10px); }
+    }
+
+    /* Auth header with logo */
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Pulse animation for signup logo */
+    .auth-header .logo {
+        font-size: 3.2rem;
+        margin-bottom: 1rem;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+    }
+
+    .auth-header h1 {
+        color: #f1f5f9;
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .auth-header p {
+        color: #cbd5e1;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    /* Form styling in auth */
+    .auth-card .form-group {
+        margin-bottom: 1.8rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .auth-card .form-group label {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-weight: 700;
+        color: #f1f5f9;
+        margin-bottom: 0.7rem;
+        font-size: 0.9rem;
+    }
+
+    .auth-card .form-group label i {
+        color: #00d4ff;
+    }
+
+    /* Input animation on focus */
+    .auth-card .form-group input {
+        width: 100%;
+        padding: 1.05rem 1.5rem;
+        border: 2.5px solid rgba(0, 212, 255, 0.2);
+        border-radius: 14px;
+        font-size: 1rem;
+        background: rgba(30, 41, 59, 0.8);
+        color: #f1f5f9;
+        transition: all 0.3s ease;
+        font-family: inherit;
+        animation: inputSlide 0.4s ease-out;
+    }
+
+    @keyframes inputSlide {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .auth-card .form-group input::placeholder {
+        color: rgba(203, 213, 225, 0.4);
+    }
+
+    .auth-card .form-group input:focus {
+        outline: none;
+        border-color: #00d4ff;
+        background: rgba(30, 41, 59, 1);
+        box-shadow: 0 0 0 6px rgba(0, 212, 255, 0.15);
+        transform: translateY(-2px);
+    }
+
+    /* Submit button with glow animation */
+    .submit-btn {
+        width: 100%;
+        padding: 1.1rem 1.8rem;
+        background: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+        color: #0f172a;
+        border: none;
+        border-radius: 14px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(0, 212, 255, 0.35);
+        position: relative;
+        z-index: 1;
+        margin-top: 0.5rem;
+        animation: buttonGlow 0.5s ease-out;
+    }
+
+    @keyframes buttonGlow {
+        from {
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+            transform: scale(0.98);
+        }
+        to {
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.35);
+            transform: scale(1);
+        }
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(0, 212, 255, 0.45);
+    }
+
+    .submit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    /* Toggle form link */
+    .toggle-form {
+        text-align: center;
+        margin-top: 1.8rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .toggle-form p {
+        color: #cbd5e1;
+        font-size: 0.95rem;
+    }
+
+    .toggle-form a {
+        color: #00d4ff;
+        text-decoration: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        background: none;
+        padding: 0;
+    }
+
+    .toggle-form a:hover {
+        color: #06b6d4;
+        text-decoration: underline;
+    }
+
+    /* Alert styling in auth */
+    .auth-card .alert {
+        background: rgba(220, 53, 69, 0.15);
+        color: #fca5a5;
+        border: 1px solid rgba(220, 53, 69, 0.4);
+        padding: 1.1rem 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.8rem;
+        font-size: 0.9rem;
+        position: relative;
+        z-index: 1;
+        animation: slideInDown 0.3s ease-out;
+    }
+
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem !important;
+        }
+
+        .auth-card {
+            padding: 2.5rem;
+            border-radius: 20px;
+        }
+
+        .auth-header .logo {
+            font-size: 2.5rem;
+        }
+
+        .auth-header h1 {
+            font-size: 1.6rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .auth-card {
+            padding: 2rem;
+        }
+
+        .auth-header h1 {
+            font-size: 1.4rem;
+        }
+
+        .auth-header p {
+            font-size: 0.85rem;
+        }
+
+        .submit-btn {
+            padding: 0.95rem 1.5rem;
+            font-size: 0.95rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="logo">✨</div>
+            <h1>Join BitPredict</h1>
+            <p>Start Predicting Bitcoin Prices</p>
+        </div>
+
+        {% if error %}
+        <div class="alert">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('signup') }}">
+            <div class="form-group">
+                <label for="signup-username"><i class="fas fa-user"></i> USERNAME</label>
+                <input type="text" id="signup-username" name="username" placeholder="Choose a username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="signup-password"><i class="fas fa-lock"></i> PASSWORD</label>
+                <input type="password" id="signup-password" name="password" placeholder="Create a strong password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="signup-confirm"><i class="fas fa-lock"></i> CONFIRM PASSWORD</label>
+                <input type="password" id="signup-confirm" name="confirm_password" placeholder="Confirm your password" required>
+            </div>
+
+            <button type="submit" class="submit-btn">Create Account</button>
+        </form>
+
+        <div class="toggle-form">
+            <p>Already registered? <a href="{{ url_for('login') }}">Sign In</a></p>
+        </div>
+
+        <div style="text-align: center; margin-top: 1.5rem; color: #cbd5e1; font-size: 0.9rem; position: relative; z-index: 1;">
+            <p><i class="fas fa-shield-alt"></i> Secure Registration<br><i class="fas fa-star"></i> Free to Use<br><i class="fas fa-rocket"></i> Start Today</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Security - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+    <div class="sidebar-nav">
+        <h3>Admin Menu</h3>
+        <ul>
+            <li><a href="{{ url_for('admin_home') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('admin_security') }}" class="active">Security</a></li>
+            <li><a href="{{ url_for('admin_analytics') }}">Analytics</a></li>
+            <li><a href="{{ url_for('admin_realtime_price') }}">Real-Time Price</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <h1>Security Management</h1>
+
+        <div class="card">
+            <h2>Suspicious Activities</h2>
+            {% if suspicious_activities %}
+            <table>
+                <tr>
+                    <th>Activity Type</th>
+                    <th>Username</th>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                </tr>
+                {% for activity in suspicious_activities %}
+                <tr>
+                    <td>{{ activity.type }}</td>
+                    <td>{{ activity.username }}</td>
+                    <td>{{ activity.timestamp }}</td>
+                    <td><button class="btn btn-secondary" onclick="alert('Activity blocked')">Review</button></td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p>No suspicious activities detected.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2>Login Audit Trail</h2>
+            {% if login_logs %}
+            <table>
+                <tr>
+                    <th>Username</th>
+                    <th>Timestamp</th>
+                    <th>Status</th>
+                </tr>
+                {% for log in login_logs %}
+                <tr>
+                    <td>{{ log.username }}</td>
+                    <td>{{ log.timestamp }}</td>
+                    <td>
+                        {% if log.status == 'success' %}
+                            <span class="price-positive">✓ Success</span>
+                        {% else %}
+                            <span class="price-negative">✗ Failed</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if log.username != 'admin' %}
+                        <form method="post" action="{{ url_for('admin_delete_user') }}" style="display:inline;">
+                            <input type="hidden" name="username" value="{{ log.username }}">
+                            <button type="submit" class="btn btn-danger" style="background:#ff6b6b; color:#fff; border:none; padding:0.3rem 0.7rem; border-radius:4px; cursor:pointer;">Delete</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p>No login logs available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

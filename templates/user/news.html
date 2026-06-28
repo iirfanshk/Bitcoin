@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Bitcoin News - Latest Updates{% endblock %}
+
+{% block content %}
+<div class="sidebar">
+    <div class="sidebar-nav">
+        <h3>User Menu</h3>
+        <ul>
+            <li><a href="{{ url_for('user_home') }}">Home</a></li>
+            <li><a href="{{ url_for('user_about') }}">About Bitcoin</a></li>
+            <li><a href="{{ url_for('user_predict') }}">Predict Price</a></li>
+            <li><a href="{{ url_for('user_ai_predict') }}">AI Prediction</a></li>
+            <li><a href="{{ url_for('user_news') }}" class="active">Bitcoin News</a></li>
+            <li><a href="{{ url_for('user_contact') }}">Contact</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <h1>📰 Bitcoin News & Updates</h1>
+        <p style="color: var(--text-light); margin-bottom: 2rem;">Real-time Bitcoin news from leading crypto news sources</p>
+
+        <div id="news-container" style="display: grid; gap: 1.8rem;">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading Bitcoin news...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .news-card {
+        background: linear-gradient(135deg, rgba(91, 124, 229, 0.1) 0%, rgba(155, 126, 207, 0.1) 100%);
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1);
+        border: 1px solid rgba(91, 124, 229, 0.15);
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .news-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 15px 40px rgba(91, 124, 229, 0.15);
+        background: linear-gradient(135deg, rgba(91, 124, 229, 0.15) 0%, rgba(155, 126, 207, 0.15) 100%);
+    }
+
+    .news-image {
+        width: 200px;
+        height: 150px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .news-content {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .news-source {
+        display: inline-block;
+        background: rgba(91, 124, 229, 0.2);
+        color: #5b7ce5;
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-bottom: 0.8rem;
+        width: fit-content;
+    }
+
+    .news-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.8rem;
+        line-height: 1.4;
+    }
+
+    .news-summary {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .news-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .news-date {
+        font-size: 0.8rem;
+        color: #9b7ecf;
+        font-weight: 600;
+    }
+
+    .news-link {
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        background: linear-gradient(135deg, #5b7ce5 0%, #9b7ecf 100%);
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+    }
+
+    .news-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(91, 124, 229, 0.35);
+    }
+
+    @media (max-width: 768px) {
+        .news-card {
+            flex-direction: column;
+        }
+
+        .news-image {
+            width: 100%;
+            height: 200px;
+        }
+    }
+</style>
+
+<script>
+    function loadNews() {
+        fetch('/api/bitcoin-news')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('news-container');
+                container.innerHTML = '';
+
+                if (!data.news || data.news.length === 0) {
+                    container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-light);">No news available at the moment.</p>';
+                    return;
+                }
+
+                data.news.forEach(article => {
+                    const date = new Date(article.published);
+                    const formattedDate = date.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    const card = document.createElement('div');
+                    card.className = 'news-card';
+                    card.innerHTML = `
+                        <img src="${article.image || '/placeholder.svg?height=150&width=200'}" alt="${article.title}" class="news-image" onerror="this.src='/placeholder.svg?height=150&width=200'">
+                        <div class="news-content">
+                            <div>
+                                <span class="news-source">${article.source}</span>
+                                <h3 class="news-title">${article.title}</h3>
+                                <p class="news-summary">${article.summary}</p>
+                            </div>
+                            <div class="news-footer">
+                                <span class="news-date">${formattedDate}</span>
+                                <a href="${article.link}" target="_blank" class="news-link">Read More →</a>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading news:', error);
+                document.getElementById('news-container').innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-light);">Failed to load news. Please try again later.</p>';
+            });
+    }
+
+    // Load news on page load
+    loadNews();
+
+    // Refresh news every 1 minute
+    setInterval(loadNews, 60 * 1000);
+</script>
+
+{% endblock %}
