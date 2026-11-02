@@ -262,7 +262,24 @@ http://127.0.0.1:5000
 
 ## 📸 8. Application Screenshots
 
-Screenshots of the application, including the dashboard, Bitcoin market information, prediction results, and PDF reports, will be added here.
+The following screenshots showcase the application's user interface, Bitcoin market information, prediction functionality, and analytical outputs.
+
+### 8.1 Application Dashboard
+
+![Application Dashboard](screenshots/Screenshot%202025-12-18%20210651.png)
+
+### 8.2 Bitcoin Market Information
+
+![Bitcoin Market Information](screenshots/Screenshot%202025-12-18%20210813.png)
+
+### 8.3 Price Prediction Interface
+
+![Price Prediction Interface](screenshots/Screenshot%202025-12-18%20211644.png)
+
+### 8.4 Prediction Results
+
+![Prediction Results](screenshots/Screenshot%202025-12-18%20211657.png)
+
 
 ## 🔮 9. Future Improvements
 
